@@ -34,7 +34,9 @@ const ru: Translation = {
     dayAt: '{{day}}, {{time}}',
   },
   calendar: {
-    placeholder: 'Здесь будет календарь с задачами',
+    today: 'Сегодня',
+    emptyDay: 'На этот день задач нет',
+    emptyDayHint: 'Нажмите +, чтобы добавить',
   },
   birthdays: {
     placeholder: 'Скоро здесь будут дни рождения',
@@ -92,6 +94,12 @@ const ru: Translation = {
   settings: {
     theme: 'Тема',
     language: 'Язык',
+    weekStart: 'Начало недели',
+    weekStarts: {
+      system: 'Как в системе',
+      monday: 'Понедельник',
+      sunday: 'Воскресенье',
+    },
     themes: {
       system: 'Системная',
       light: 'Светлая',

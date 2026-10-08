@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { Spacing } from '@/constants/theme';
 import { useNotificationPermission } from '@/features/notifications/permissions';
+import { useWeekStart } from '@/features/settings/use-week-start';
 import { getTaskStatus } from '@/features/tasks/selectors';
 import { useTasks } from '@/features/tasks/store';
 import type { Task } from '@/features/tasks/types';
@@ -54,6 +55,7 @@ export function TaskForm({ task, initialRemindAt }: Props) {
   const now = useNow();
   const navigation = useNavigation();
   const { formatDate, formatTime, uses24hourClock } = useDateFormat();
+  const weekStart = useWeekStart();
   const addTask = useTasks((s) => s.addTask);
   const updateTask = useTasks((s) => s.updateTask);
   const deleteTask = useTasks((s) => s.deleteTask);
@@ -112,6 +114,7 @@ export function TaskForm({ task, initialRemindAt }: Props) {
     const date = await pickDate({
       value: remindAt,
       minimumDate: isNew ? startOfDay(now) : undefined,
+      firstDayOfWeek: weekStart,
     });
     if (date) {
       setRemindAt(withDatePart(remindAt, date));

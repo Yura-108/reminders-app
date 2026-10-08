@@ -1,9 +1,10 @@
-import { router, Tabs } from 'expo-router';
+import { router, Tabs, usePathname } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
 import type { ColorValue } from 'react-native';
 
 import { TabBarAddButton } from '@/components/tab-bar-add-button';
+import { useCalendarSelection } from '@/features/calendar/store';
 import { countBurning } from '@/features/tasks/selectors';
 import { useTasks } from '@/features/tasks/store';
 import { useNow } from '@/hooks/use-now';
@@ -22,6 +23,17 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const now = useNow();
   const burningCount = useTasks((s) => countBurning(s.tasks, now));
+  const pathname = usePathname();
+  const calendarDay = useCalendarSelection((s) => s.selectedDay);
+
+  // На вкладке календаря новая задача создаётся на выбранный в нём день (SPEC 3.3).
+  const openNewTask = () => {
+    if (pathname === '/calendar') {
+      router.push({ pathname: '/task/new', params: { date: calendarDay } });
+    } else {
+      router.push('/task/new');
+    }
+  };
 
   return (
     <Tabs
@@ -48,7 +60,7 @@ export default function TabLayout() {
         name="add"
         options={{
           title: t('tabs.add'),
-          tabBarButton: () => <TabBarAddButton onPress={() => router.push('/task/new')} />,
+          tabBarButton: () => <TabBarAddButton onPress={openNewTask} />,
         }}
       />
       <Tabs.Screen

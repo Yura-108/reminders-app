@@ -4,6 +4,8 @@ type PickOptions = {
   value: Date;
   minimumDate?: Date;
   is24Hour?: boolean;
+  /** Первый день недели в календаре диалога: 0 — воскресенье, 1 — понедельник… */
+  firstDayOfWeek?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
 };
 
 /**
@@ -11,12 +13,13 @@ type PickOptions = {
  * Возвращают выбранное значение или null, если пользователь закрыл диалог.
  * (Для iOS позже понадобится другая реализация — диалогов там нет, только встроенный пикер.)
  */
-export function pickDate({ value, minimumDate }: PickOptions): Promise<Date | null> {
+export function pickDate({ value, minimumDate, firstDayOfWeek }: PickOptions): Promise<Date | null> {
   return new Promise((resolve) => {
     DateTimePickerAndroid.open({
       value,
       mode: 'date',
       minimumDate,
+      firstDayOfWeek,
       onValueChange: (_event, date) => resolve(date),
       onDismiss: () => resolve(null),
     });

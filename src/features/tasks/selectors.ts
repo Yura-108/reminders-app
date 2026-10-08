@@ -1,4 +1,4 @@
-import { calendarDayDiff } from '@/utils/date';
+import { calendarDayDiff, toDayKey } from '@/utils/date';
 
 import type { Task, TaskStatus } from './types';
 
@@ -64,4 +64,39 @@ export function buildTaskSections(tasks: Task[], now: Date): TaskSection[] {
 
 export function countBurning(tasks: Task[], now: Date): number {
   return tasks.filter((task) => getTaskStatus(task, now) === 'burning').length;
+}
+
+export type DayMarker = 'burning' | 'active' | 'done';
+
+/**
+ * Отметки для календаря (SPEC 3.3): по дню — самое «важное» состояние его задач.
+ * burning — есть горящие, active — есть невыполненные, done — только выполненные.
+ */
+export function buildDayMarkers(tasks: Task[], now: Date): Map<string, DayMarker> {
+  const priority: Record<DayMarker, number> = { done: 0, active: 1, burning: 2 };
+  const markers = new Map<string, DayMarker>();
+
+  for (const task of tasks) {
+    const status = getTaskStatus(task, now);
+    const marker: DayMarker =
+      status === 'burning' ? 'burning' : status === 'done' ? 'done' : 'active';
+    const day = toDayKey(new Date(task.remindAt));
+    const current = markers.get(day);
+
+    if (!current || priority[marker] > priority[current]) {
+      markers.set(day, marker);
+    }
+  }
+
+  return markers;
+}
+
+/** Задачи дня: сначала невыполненные по времени, затем выполненные. */
+export function tasksForDay(tasks: Task[], day: string): Task[] {
+  return tasks
+    .filter((task) => toDayKey(new Date(task.remindAt)) === day)
+    .sort((a, b) => {
+      const doneDiff = Number(Boolean(a.completedAt)) - Number(Boolean(b.completedAt));
+      return doneDiff !== 0 ? doneDiff : byRemindAt(a, b);
+    });
 }

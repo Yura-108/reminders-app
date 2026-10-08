@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useWeekStart } from '@/features/settings/use-week-start';
 import { useSnackbar } from '@/features/snackbar/store';
 import { useTasks } from '@/features/tasks/store';
 import { useDateFormat } from '@/hooks/use-date-format';
@@ -36,6 +37,7 @@ export default function SnoozeScreen() {
   const snoozeTask = useTasks((s) => s.snoozeTask);
   const showSnackbar = useSnackbar((s) => s.show);
   const { formatWhen, uses24hourClock } = useDateFormat();
+  const weekStart = useWeekStart();
 
   const snooze = (until: Date) => {
     if (!task) return;
@@ -52,7 +54,11 @@ export default function SnoozeScreen() {
     const now = new Date();
     const initial = minutesFromNow(60);
 
-    const date = await pickDate({ value: initial, minimumDate: startOfDay(now) });
+    const date = await pickDate({
+      value: initial,
+      minimumDate: startOfDay(now),
+      firstDayOfWeek: weekStart,
+    });
     if (!date) return;
     const time = await pickTime({ value: withDatePart(initial, date), is24Hour: uses24hourClock });
     if (!time) return;

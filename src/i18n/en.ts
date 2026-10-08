@@ -36,7 +36,9 @@ const en = {
     dayAt: '{{day}}, {{time}}',
   },
   calendar: {
-    placeholder: 'Your calendar with tasks will be here',
+    today: 'Today',
+    emptyDay: 'No tasks for this day',
+    emptyDayHint: 'Tap + to add one',
   },
   birthdays: {
     placeholder: 'Birthdays are coming soon',
@@ -94,6 +96,12 @@ const en = {
   settings: {
     theme: 'Theme',
     language: 'Language',
+    weekStart: 'First day of week',
+    weekStarts: {
+      system: 'System',
+      monday: 'Monday',
+      sunday: 'Sunday',
+    },
     themes: {
       system: 'System',
       light: 'Light',

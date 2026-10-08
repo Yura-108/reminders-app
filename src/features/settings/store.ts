@@ -2,11 +2,18 @@ import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import type { LanguagePreference, Settings, ThemePreference, VibrationPreset } from './types';
+import type {
+  LanguagePreference,
+  Settings,
+  ThemePreference,
+  VibrationPreset,
+  WeekStartPreference,
+} from './types';
 
 type SettingsState = Settings & {
   setTheme: (theme: ThemePreference) => void;
   setLanguage: (language: LanguagePreference) => void;
+  setWeekStart: (weekStart: WeekStartPreference) => void;
   setVibration: (vibration: VibrationPreset) => void;
   setEscalation: (escalation: boolean) => void;
 };
@@ -14,6 +21,7 @@ type SettingsState = Settings & {
 const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   language: 'system',
+  weekStart: 'system',
   vibration: 'short',
   escalation: true,
 };
@@ -28,6 +36,7 @@ export const useSettings = create<SettingsState>()(
       ...DEFAULT_SETTINGS,
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
+      setWeekStart: (weekStart) => set({ weekStart }),
       setVibration: (vibration) => set({ vibration }),
       setEscalation: (escalation) => set({ escalation }),
     }),
@@ -42,9 +51,10 @@ export const useSettings = create<SettingsState>()(
         },
       })),
       // Сохранённые ранее настройки сливаются с DEFAULT_SETTINGS, поэтому новые поля получают значения по умолчанию.
-      partialize: ({ theme, language, vibration, escalation }) => ({
+      partialize: ({ theme, language, weekStart, vibration, escalation }) => ({
         theme,
         language,
+        weekStart,
         vibration,
         escalation,
       }),

@@ -24,7 +24,19 @@ export function createDateFormatter(locale: string, uses24hourClock: boolean, t:
     month: 'short',
   });
 
+  const dayTitleFormat = new Intl.DateTimeFormat(locale, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
   const formatTime = (date: Date) => timeFormat.format(date);
+
+  /** «Среда, 8 октября» — заголовок дня в календаре. */
+  const formatDayTitle = (date: Date) => {
+    const title = dayTitleFormat.format(date);
+    return title.charAt(0).toUpperCase() + title.slice(1);
+  };
 
   /** «ср, 8 окт.» — для поля даты в форме. */
   const formatDate = (date: Date) => fullDayFormat.format(date);
@@ -46,5 +58,5 @@ export function createDateFormatter(locale: string, uses24hourClock: boolean, t:
     return t('date.dayAt', { day, time });
   };
 
-  return { formatTime, formatDate, formatWhen, uses24hourClock };
+  return { formatTime, formatDate, formatDayTitle, formatWhen, uses24hourClock };
 }

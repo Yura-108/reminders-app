@@ -75,3 +75,10 @@ export function startOfWeekMonday(date: Date): Date {
   const daysSinceMonday = (result.getDay() + 6) % 7;
   return addDays(result, -daysSinceMonday);
 }
+
+/** Ключ дня 'YYYY-MM-DD' по местному времени (формат дат календаря и параметра `?date=`). */
+export function toDayKey(date: Date): string {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
