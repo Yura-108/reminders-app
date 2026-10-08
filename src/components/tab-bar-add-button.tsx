@@ -1,4 +1,5 @@
 import { SymbolView } from 'expo-symbols';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useTheme } from '@/hooks/use-theme';
@@ -14,13 +15,14 @@ type Props = {
  */
 export function TabBarAddButton({ onPress }: Props) {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View style={styles.slot}>
       <Pressable
         onPress={onPress}
         accessibilityRole="button"
-        accessibilityLabel="Добавить задачу"
+        accessibilityLabel={t('task.addA11y')}
         style={({ pressed }) => [
           styles.button,
           { backgroundColor: theme.primary, opacity: pressed ? 0.85 : 1 },

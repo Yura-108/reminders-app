@@ -1,14 +1,17 @@
 /**
- * Learn more about light and dark modes:
- * https://docs.expo.dev/guides/color-schemes/
+ * Цвета текущей темы. Подробнее: https://docs.expo.dev/develop/user-interface/color-themes/
  */
 
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
-export function useTheme() {
+/** Текущая схема: 'light' | 'dark' (вместо 'unspecified' — светлая). */
+export function useResolvedColorScheme() {
   const scheme = useColorScheme();
-  const theme = scheme === 'unspecified' ? 'light' : scheme;
 
-  return Colors[theme];
+  return scheme === 'dark' ? 'dark' : 'light';
+}
+
+export function useTheme() {
+  return Colors[useResolvedColorScheme()];
 }

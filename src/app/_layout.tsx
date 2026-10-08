@@ -1,21 +1,31 @@
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import '@/i18n';
+
+import { Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useColorScheme } from 'react-native';
+import { useTranslation } from 'react-i18next';
+
+import { getNavigationTheme } from '@/constants/theme';
+import { applyInitialTheme, useApplySettings } from '@/features/settings/use-apply-settings';
+import { useResolvedColorScheme } from '@/hooks/use-theme';
+
+applyInitialTheme();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  useApplySettings();
+  const { t } = useTranslation();
+  const scheme = useResolvedColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={getNavigationTheme(scheme)}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="task/new"
-          options={{ presentation: 'modal', title: 'Новая задача' }}
+          options={{ presentation: 'modal', title: t('task.newTitle') }}
         />
         <Stack.Screen
           name="task/[id]"
-          options={{ presentation: 'modal', title: 'Задача' }}
+          options={{ presentation: 'modal', title: t('task.editTitle') }}
         />
         <Stack.Screen
           name="task/snooze/[id]"
@@ -26,7 +36,7 @@ export default function RootLayout() {
           }}
         />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );
 }

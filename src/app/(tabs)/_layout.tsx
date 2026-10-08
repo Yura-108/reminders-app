@@ -1,5 +1,6 @@
 import { router, Tabs } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import { useTranslation } from 'react-i18next';
 import type { ColorValue } from 'react-native';
 
 import { TabBarAddButton } from '@/components/tab-bar-add-button';
@@ -15,6 +16,7 @@ function tabIcon(name: IconName) {
 
 export default function TabLayout() {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Tabs
@@ -25,35 +27,35 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Задачи',
+          title: t('tabs.tasks'),
           tabBarIcon: tabIcon({ ios: 'checklist', android: 'checklist', web: 'checklist' }),
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
-          title: 'Календарь',
+          title: t('tabs.calendar'),
           tabBarIcon: tabIcon({ ios: 'calendar', android: 'calendar_month', web: 'calendar_month' }),
         }}
       />
       <Tabs.Screen
         name="add"
         options={{
-          title: 'Добавить',
+          title: t('tabs.add'),
           tabBarButton: () => <TabBarAddButton onPress={() => router.push('/task/new')} />,
         }}
       />
       <Tabs.Screen
         name="birthdays"
         options={{
-          title: 'Дни рождения',
+          title: t('tabs.birthdays'),
           tabBarIcon: tabIcon({ ios: 'gift', android: 'cake', web: 'cake' }),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Настройки',
+          title: t('tabs.settings'),
           tabBarIcon: tabIcon({ ios: 'gearshape', android: 'settings', web: 'settings' }),
         }}
       />

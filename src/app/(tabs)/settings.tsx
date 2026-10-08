@@ -1,5 +1,42 @@
-import { PlaceholderScreen } from '@/components/placeholder-screen';
+import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet } from 'react-native';
+
+import { OptionGroup } from '@/components/ui/option-group';
+import { Spacing } from '@/constants/theme';
+import { useSettings } from '@/features/settings/store';
+import type { LanguagePreference, ThemePreference } from '@/features/settings/types';
+
+const THEMES: ThemePreference[] = ['system', 'light', 'dark'];
+const LANGUAGES: LanguagePreference[] = ['system', 'ru', 'en'];
 
 export default function SettingsScreen() {
-  return <PlaceholderScreen title="Настройки" hint="Тема, язык и вибрация" />;
+  const { t } = useTranslation();
+  const theme = useSettings((s) => s.theme);
+  const language = useSettings((s) => s.language);
+  const setTheme = useSettings((s) => s.setTheme);
+  const setLanguage = useSettings((s) => s.setLanguage);
+
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <OptionGroup
+        title={t('settings.theme')}
+        value={theme}
+        onChange={setTheme}
+        options={THEMES.map((value) => ({ value, label: t(`settings.themes.${value}`) }))}
+      />
+      <OptionGroup
+        title={t('settings.language')}
+        value={language}
+        onChange={setLanguage}
+        options={LANGUAGES.map((value) => ({ value, label: t(`settings.languages.${value}`) }))}
+      />
+    </ScrollView>
+  );
 }
+
+const styles = StyleSheet.create({
+  content: {
+    padding: Spacing.three,
+    gap: Spacing.four,
+  },
+});

@@ -1,5 +1,9 @@
+import { useTranslation } from 'react-i18next';
+
 import { PlaceholderScreen } from '@/components/placeholder-screen';
 
 export default function BirthdaysScreen() {
-  return <PlaceholderScreen title="Дни рождения" hint="Скоро здесь будут дни рождения" />;
+  const { t } = useTranslation();
+
+  return <PlaceholderScreen title={t('tabs.birthdays')} hint={t('birthdays.placeholder')} />;
 }

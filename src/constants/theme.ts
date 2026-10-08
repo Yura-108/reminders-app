@@ -1,34 +1,75 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Цвета приложения для светлой и тёмной темы.
+ * Компоненты берут их через `useTheme()`, а не хардкодят.
  */
 
 import '@/global.css';
 
+import { DarkTheme, DefaultTheme, type Theme } from 'expo-router';
 import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
+    /** Основной текст */
+    text: '#11181C',
+    /** Подписи, второстепенный текст, неактивные иконки */
     textSecondary: '#60646C',
+    /** Фон экрана */
+    background: '#F5F6F8',
+    /** Фон карточек, шапок и таббара */
+    card: '#FFFFFF',
+    /** Фон полей ввода, чипов, вложенных блоков */
+    backgroundElement: '#ECEDF0',
+    /** Нажатый / выбранный элемент */
+    backgroundSelected: '#DFE1E6',
+    /** Разделители и обводки */
+    border: '#E2E4E8',
+    /** Акцент: кнопка «+», выбранные элементы, ссылки */
     primary: '#208AEF',
-    onPrimary: '#ffffff',
+    /** Текст и иконки поверх primary */
+    onPrimary: '#FFFFFF',
+    /** «Горящие» задачи, удаление */
+    danger: '#E5484D',
+    /** Выполнено */
+    success: '#30A46C',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
+    text: '#ECEDEE',
+    textSecondary: '#9BA1A6',
+    background: '#0B0B0D',
+    card: '#18191B',
+    backgroundElement: '#232427',
     backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    border: '#2B2D31',
     primary: '#3D9BF5',
-    onPrimary: '#ffffff',
+    onPrimary: '#FFFFFF',
+    danger: '#FF6369',
+    success: '#3DD68C',
   },
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+
+/**
+ * Тема для навигации (шапки экранов, таббар, фон стека) на основе наших цветов.
+ */
+export function getNavigationTheme(scheme: 'light' | 'dark'): Theme {
+  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const colors = Colors[scheme];
+
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: colors.primary,
+      background: colors.background,
+      card: colors.card,
+      text: colors.text,
+      border: colors.border,
+      notification: colors.danger,
+    },
+  };
+}
 
 export const Fonts = Platform.select({
   ios: {

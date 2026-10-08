@@ -1,5 +1,9 @@
+import { useTranslation } from 'react-i18next';
+
 import { PlaceholderScreen } from '@/components/placeholder-screen';
 
 export default function CalendarScreen() {
-  return <PlaceholderScreen title="Календарь" hint="Здесь будет календарь с задачами" />;
+  const { t } = useTranslation();
+
+  return <PlaceholderScreen title={t('tabs.calendar')} hint={t('calendar.placeholder')} />;
 }
