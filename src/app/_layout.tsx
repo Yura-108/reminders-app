@@ -5,10 +5,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { getNavigationTheme } from '@/constants/theme';
 import { applyInitialTheme, useApplySettings } from '@/features/settings/use-apply-settings';
 import { useTasks } from '@/features/tasks/store';
+import { WeeklyCleanup } from '@/features/tasks/weekly-cleanup';
 import { useResolvedColorScheme } from '@/hooks/use-theme';
 
 applyInitialTheme();
@@ -29,27 +31,31 @@ export default function RootLayout() {
   const scheme = useResolvedColorScheme();
 
   return (
-    <ThemeProvider value={getNavigationTheme(scheme)}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="task/new"
-          options={{ presentation: 'modal', title: t('task.newTitle') }}
-        />
-        <Stack.Screen
-          name="task/[id]"
-          options={{ presentation: 'modal', title: t('task.editTitle') }}
-        />
-        <Stack.Screen
-          name="task/snooze/[id]"
-          options={{
-            presentation: 'formSheet',
-            sheetAllowedDetents: 'fitToContents',
-            headerShown: false,
-          }}
-        />
-      </Stack>
-      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-    </ThemeProvider>
+    // Корень для жестов (свайпы карточек). Должен оборачивать всё приложение.
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={getNavigationTheme(scheme)}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="task/new"
+            options={{ presentation: 'modal', title: t('task.newTitle') }}
+          />
+          <Stack.Screen
+            name="task/[id]"
+            options={{ presentation: 'modal', title: t('task.editTitle') }}
+          />
+          <Stack.Screen
+            name="task/snooze/[id]"
+            options={{
+              presentation: 'formSheet',
+              sheetAllowedDetents: 'fitToContents',
+              headerShown: false,
+            }}
+          />
+        </Stack>
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        <WeeklyCleanup />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
@@ -9,16 +9,15 @@ import { Spacing } from '@/constants/theme';
 import type { Task, TaskStatus } from '@/features/tasks/types';
 import { useTheme } from '@/hooks/use-theme';
 
-/** Сколько задача остаётся на месте с галочкой, прежде чем уехать в «Выполненные». */
-const DONE_DELAY_MS = 700;
-
 type Props = {
   task: Task;
   status: TaskStatus;
   /** Готовая подпись времени: «19:30», «завтра, 9:00»… */
   whenLabel: string;
+  /** Галочка уже стоит, но задача ещё не уехала в «Выполненные» (см. useDelayedDone). */
+  pendingDone: boolean;
   onPress: (task: Task) => void;
-  onToggleDone: (task: Task) => void;
+  onCheckboxPress: () => void;
 };
 
 /**
@@ -29,52 +28,14 @@ export const TaskCard = memo(function TaskCard({
   task,
   status,
   whenLabel,
+  pendingDone,
   onPress,
-  onToggleDone,
+  onCheckboxPress,
 }: Props) {
   const theme = useTheme();
   const { t } = useTranslation();
-  // «Почти выполнена»: галочка уже стоит, но задача ещё не уехала в «Выполненные».
-  const [pendingDone, setPendingDone] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const commit = useRef<(() => void) | null>(null);
-
-  // Если карточка исчезла во время паузы (например, сменила секцию), отметку не теряем — применяем сразу.
-  useEffect(
-    () => () => {
-      if (timer.current) {
-        clearTimeout(timer.current);
-        commit.current?.();
-      }
-    },
-    [],
-  );
-
   const done = status === 'done' || pendingDone;
   const burning = status === 'burning' && !pendingDone;
-
-  const handleCheckboxPress = () => {
-    if (status === 'done') {
-      onToggleDone(task);
-      return;
-    }
-
-    if (pendingDone) {
-      // Повторный тап во время паузы — передумал.
-      clearTimeout(timer.current ?? undefined);
-      timer.current = null;
-      setPendingDone(false);
-      return;
-    }
-
-    commit.current = () => onToggleDone(task);
-    setPendingDone(true);
-    timer.current = setTimeout(() => {
-      timer.current = null;
-      setPendingDone(false);
-      onToggleDone(task);
-    }, DONE_DELAY_MS);
-  };
 
   return (
     <Pressable
@@ -87,7 +48,7 @@ export const TaskCard = memo(function TaskCard({
 
       <Checkbox
         checked={done}
-        onPress={handleCheckboxPress}
+        onPress={onCheckboxPress}
         accessibilityLabel={done ? t('tasks.markUndone') : t('tasks.markDone')}
       />
 

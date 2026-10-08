@@ -25,7 +25,16 @@ export function useDateFormat() {
       year: 'numeric',
     });
 
+    const fullDayFormat = new Intl.DateTimeFormat(locale, {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+    });
+
     const formatTime = (date: Date) => timeFormat.format(date);
+
+    /** «ср, 8 окт.» — для поля даты в форме. */
+    const formatDate = (date: Date) => fullDayFormat.format(date);
 
     /** «19:30», «завтра, 9:00», «вчера, 18:00», «12 окт., 9:00». */
     const formatWhen = (date: Date, now: Date) => {
@@ -44,6 +53,6 @@ export function useDateFormat() {
       return t('date.dayAt', { day, time });
     };
 
-    return { formatTime, formatWhen };
+    return { formatTime, formatDate, formatWhen, uses24hourClock };
   }, [locale, uses24hourClock, t]);
 }

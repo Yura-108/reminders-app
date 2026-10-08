@@ -1,13 +1,10 @@
 import { randomUUID } from 'expo-crypto';
 import { create } from 'zustand';
 
-import { Duration } from '@/utils/date';
+import { startOfWeekMonday } from '@/utils/date';
 
 import * as repository from './repository';
 import type { NewTask, Task, TaskPatch } from './types';
-
-/** Сколько хранить выполненные задачи (SPEC 5.4). */
-const KEEP_COMPLETED_DAYS = 30;
 
 type TasksState = {
   tasks: Task[];
@@ -18,6 +15,13 @@ type TasksState = {
   updateTask: (id: string, patch: TaskPatch) => Promise<void>;
   toggleDone: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
+  /** Вернуть удалённую задачу как была (кнопка «Отменить» в снэкбаре). */
+  restoreTask: (task: Task) => Promise<void>;
+  /**
+   * Еженедельная очистка (SPEC 5.4): удаляет задачи, выполненные до последней полуночи
+   * с воскресенья на понедельник. Безопасно вызывать сколько угодно раз.
+   */
+  cleanupCompleted: (now?: Date) => Promise<void>;
 };
 
 /**
@@ -34,10 +38,22 @@ export const useTasks = create<TasksState>()((set, get) => ({
       return;
     }
 
-    const cutoff = new Date(Date.now() - KEEP_COMPLETED_DAYS * Duration.DAY).toISOString();
-    await repository.deleteCompletedBefore(cutoff);
+    set({ tasks: await repository.getAllTasks() });
+    await get().cleanupCompleted();
+    set({ ready: true });
+  },
 
-    set({ tasks: await repository.getAllTasks(), ready: true });
+  cleanupCompleted: async (now = new Date()) => {
+    // ISO-строки в UTC сравниваются как строки так же, как моменты времени.
+    const cutoff = startOfWeekMonday(now).toISOString();
+    const isStale = (task: Task) => task.completedAt !== null && task.completedAt < cutoff;
+
+    if (!get().tasks.some(isStale)) {
+      return;
+    }
+
+    set((state) => ({ tasks: state.tasks.filter((task) => !isStale(task)) }));
+    await repository.deleteCompletedBefore(cutoff);
   },
 
   addTask: async ({ title, remindAt }) => {
@@ -84,5 +100,10 @@ export const useTasks = create<TasksState>()((set, get) => ({
   deleteTask: async (id) => {
     set((state) => ({ tasks: state.tasks.filter((task) => task.id !== id) }));
     await repository.deleteTask(id);
+  },
+
+  restoreTask: async (task) => {
+    set((state) => ({ tasks: [...state.tasks.filter((t) => t.id !== task.id), task] }));
+    await repository.saveTask(task);
   },
 }));

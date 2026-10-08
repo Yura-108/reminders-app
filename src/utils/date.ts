@@ -30,3 +30,48 @@ export function nextFullHour(from: Date): Date {
   result.setHours(result.getHours() + 1, 0, 0, 0);
   return result;
 }
+
+/** Та же дата, но с указанным временем (секунды обнуляются). */
+export function atTime(date: Date, hours: number, minutes = 0): Date {
+  const result = new Date(date);
+  result.setHours(hours, minutes, 0, 0);
+  return result;
+}
+
+/** Дата (год/месяц/день) из `datePart`, время — из `base`. */
+export function withDatePart(base: Date, datePart: Date): Date {
+  const result = new Date(base);
+  result.setFullYear(datePart.getFullYear(), datePart.getMonth(), datePart.getDate());
+  return result;
+}
+
+/** Время (часы/минуты) из `timePart`, дата — из `base`. Секунды обнуляются. */
+export function withTimePart(base: Date, timePart: Date): Date {
+  return atTime(base, timePart.getHours(), timePart.getMinutes());
+}
+
+/** Обрезает секунды и миллисекунды. */
+export function startOfMinute(date: Date): Date {
+  const result = new Date(date);
+  result.setSeconds(0, 0);
+  return result;
+}
+
+/** Разбирает 'YYYY-MM-DD' в локальную полночь. Некорректная строка → null. */
+export function parseDayParam(value: string | undefined): Date | null {
+  const match = value?.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/** Начало недели — понедельник 00:00 (локальное время) той недели, в которую попадает `date`. */
+export function startOfWeekMonday(date: Date): Date {
+  const result = startOfDay(date);
+  // getDay(): 0 — воскресенье, 1 — понедельник … 6 — суббота.
+  const daysSinceMonday = (result.getDay() + 6) % 7;
+  return addDays(result, -daysSinceMonday);
+}

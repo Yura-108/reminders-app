@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -26,17 +26,25 @@ type Props = {
 export function Checkbox({ checked, onPress, accessibilityLabel }: Props) {
   const theme = useTheme();
   const scale = useSharedValue(checked ? 1 : 0);
+  const isFirstRun = useRef(true);
 
   useEffect(() => {
-    scale.value = checked
-      ? withSequence(withTiming(1.25, { duration: 140 }), withSpring(1, { damping: 12 }))
-      : withTiming(0, { duration: 120 });
+    // При появлении карточки галочка уже в нужном состоянии — анимируем только изменения.
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    scale.set(
+      checked
+        ? withSequence(withTiming(1.25, { duration: 140 }), withSpring(1, { damping: 12 }))
+        : withTiming(0, { duration: 120 }),
+    );
   }, [checked, scale]);
 
-  const fillStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-    opacity: Math.min(scale.value, 1),
-  }));
+  const fillStyle = useAnimatedStyle(() => {
+    'worklet';
+    return { transform: [{ scale: scale.get() }], opacity: Math.min(scale.get(), 1) };
+  });
 
   return (
     <Pressable
@@ -47,11 +55,14 @@ export function Checkbox({ checked, onPress, accessibilityLabel }: Props) {
       accessibilityLabel={accessibilityLabel}
       style={[styles.box, { borderColor: checked ? theme.success : theme.textSecondary }]}>
       <Animated.View style={[styles.fill, { backgroundColor: theme.success }, fillStyle]}>
-        <SymbolView
-          name={{ ios: 'checkmark', android: 'check', web: 'check' }}
-          tintColor={theme.onPrimary}
-          size={16}
-        />
+        {/* Иконку создаём только у отмеченных: у неотмеченных она всё равно не видна. */}
+        {checked ? (
+          <SymbolView
+            name={{ ios: 'checkmark', android: 'check', web: 'check' }}
+            tintColor={theme.onPrimary}
+            size={16}
+          />
+        ) : null}
       </Animated.View>
     </Pressable>
   );

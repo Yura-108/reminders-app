@@ -1,9 +1,9 @@
 import { SymbolView } from 'expo-symbols';
-import { useCallback, useMemo, useState, type ReactElement } from 'react';
+import { useCallback, useDeferredValue, useMemo, useState, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, SectionList, StyleSheet, View } from 'react-native';
 
-import { TaskCard } from '@/components/task-card';
+import { SwipeableTaskCard } from '@/components/swipeable-task-card';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
 import { buildTaskSections, getTaskStatus, type TaskSection } from '@/features/tasks/selectors';
@@ -16,6 +16,7 @@ type Props = {
   now: Date;
   onPressTask: (task: Task) => void;
   onToggleDone: (task: Task) => void;
+  onDelete: (task: Task) => void;
   ListFooterComponent?: ReactElement | null;
 };
 
@@ -28,12 +29,16 @@ export function TaskSectionList({
   now,
   onPressTask,
   onToggleDone,
+  onDelete,
   ListFooterComponent,
 }: Props) {
   const theme = useTheme();
   const { t } = useTranslation();
   const { formatWhen } = useDateFormat();
   const [doneExpanded, setDoneExpanded] = useState(false);
+  // Стрелка в заголовке поворачивается сразу, а тяжёлый рендер карточек идёт следом
+  // в фоне и не блокирует интерфейс (React может прервать его ради более срочных обновлений).
+  const deferredDoneExpanded = useDeferredValue(doneExpanded);
 
   const sections = useMemo(() => buildTaskSections(tasks, now), [tasks, now]);
 
@@ -43,9 +48,9 @@ export function TaskSectionList({
       sections.map((section) => ({
         ...section,
         total: section.data.length,
-        data: section.key === 'done' && !doneExpanded ? [] : section.data,
+        data: section.key === 'done' && !deferredDoneExpanded ? [] : section.data,
       })),
-    [sections, doneExpanded],
+    [sections, deferredDoneExpanded],
   );
 
   const renderSectionHeader = useCallback(
@@ -88,15 +93,16 @@ export function TaskSectionList({
 
   const renderItem = useCallback(
     ({ item }: { item: Task }) => (
-      <TaskCard
+      <SwipeableTaskCard
         task={item}
         status={getTaskStatus(item, now)}
         whenLabel={formatWhen(new Date(item.remindAt), now)}
         onPress={onPressTask}
         onToggleDone={onToggleDone}
+        onDelete={onDelete}
       />
     ),
-    [now, formatWhen, onPressTask, onToggleDone],
+    [now, formatWhen, onPressTask, onToggleDone, onDelete],
   );
 
   return (
@@ -107,6 +113,10 @@ export function TaskSectionList({
       renderSectionHeader={renderSectionHeader}
       ItemSeparatorComponent={Separator}
       stickySectionHeadersEnabled={false}
+      // Виртуализация: сколько карточек рендерить сразу и сколько экранов держать вокруг видимой области.
+      initialNumToRender={12}
+      maxToRenderPerBatch={8}
+      windowSize={7}
       contentContainerStyle={styles.content}
       ListFooterComponent={ListFooterComponent}
     />
