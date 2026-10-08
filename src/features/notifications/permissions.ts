@@ -3,7 +3,8 @@ import { create } from 'zustand';
 
 import { Notifications } from './module';
 
-type PermissionStatus = 'granted' | 'denied' | 'undetermined';
+/** unavailable — модуля уведомлений нет (Expo Go), спрашивать нечего. */
+export type PermissionStatus = 'granted' | 'denied' | 'undetermined' | 'unavailable';
 
 type PermissionState = {
   status: PermissionStatus;
@@ -22,7 +23,7 @@ function toStatus({ granted, status }: NotificationPermissionsStatus): Permissio
 }
 
 export const useNotificationPermission = create<PermissionState>()((set) => ({
-  status: 'undetermined',
+  status: Notifications ? 'undetermined' : 'unavailable',
 
   refresh: async () => {
     if (Notifications) {
