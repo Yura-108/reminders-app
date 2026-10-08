@@ -9,7 +9,23 @@ const ru: Translation = {
     settings: 'Настройки',
   },
   tasks: {
-    placeholder: 'Здесь будет список задач',
+    sections: {
+      burning: 'Горящие',
+      today: 'Сегодня',
+      tomorrow: 'Завтра',
+      later: 'Позже',
+      done: 'Выполненные',
+    },
+    emptyTitle: 'Задач пока нет',
+    emptyHint: 'Нажмите +, чтобы добавить первую',
+    markDone: 'Отметить выполненной',
+    markUndone: 'Вернуть в работу',
+    devAdd: 'Добавить тестовую задачу (dev)',
+  },
+  date: {
+    tomorrowAt: 'завтра, {{time}}',
+    yesterdayAt: 'вчера, {{time}}',
+    dayAt: '{{day}}, {{time}}',
   },
   calendar: {
     placeholder: 'Здесь будет календарь с задачами',

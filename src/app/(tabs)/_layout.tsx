@@ -4,6 +4,9 @@ import { useTranslation } from 'react-i18next';
 import type { ColorValue } from 'react-native';
 
 import { TabBarAddButton } from '@/components/tab-bar-add-button';
+import { countBurning } from '@/features/tasks/selectors';
+import { useTasks } from '@/features/tasks/store';
+import { useNow } from '@/hooks/use-now';
 import { useTheme } from '@/hooks/use-theme';
 
 type IconName = SymbolViewProps['name'];
@@ -17,6 +20,8 @@ function tabIcon(name: IconName) {
 export default function TabLayout() {
   const theme = useTheme();
   const { t } = useTranslation();
+  const now = useNow();
+  const burningCount = useTasks((s) => countBurning(s.tasks, now));
 
   return (
     <Tabs
@@ -28,6 +33,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: t('tabs.tasks'),
+          tabBarBadge: burningCount > 0 ? burningCount : undefined,
           tabBarIcon: tabIcon({ ios: 'checklist', android: 'checklist', web: 'checklist' }),
         }}
       />

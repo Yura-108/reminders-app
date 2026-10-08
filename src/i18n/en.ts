@@ -11,7 +11,23 @@ const en = {
     settings: 'Settings',
   },
   tasks: {
-    placeholder: 'Your task list will be here',
+    sections: {
+      burning: 'Overdue',
+      today: 'Today',
+      tomorrow: 'Tomorrow',
+      later: 'Later',
+      done: 'Completed',
+    },
+    emptyTitle: 'No tasks yet',
+    emptyHint: 'Tap + to add your first task',
+    markDone: 'Mark as done',
+    markUndone: 'Mark as not done',
+    devAdd: 'Add test task (dev)',
+  },
+  date: {
+    tomorrowAt: 'tomorrow, {{time}}',
+    yesterdayAt: 'yesterday, {{time}}',
+    dayAt: '{{day}}, {{time}}',
   },
   calendar: {
     placeholder: 'Your calendar with tasks will be here',
