@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LayoutAnimation, View } from 'react-native';
 
 import { EmptyState } from '@/components/empty-state';
+import { PermissionBanner } from '@/components/permission-banner';
 import { Snackbar } from '@/components/snackbar';
 import { TaskSectionList } from '@/components/task-section-list';
 import { useSnackbar } from '@/features/snackbar/store';
@@ -56,6 +57,7 @@ export default function TasksScreen() {
 
   return (
     <View style={{ flex: 1 }}>
+      <PermissionBanner />
       {tasks.length === 0 ? (
         <EmptyState
           icon={{ ios: 'checklist', android: 'checklist', web: 'checklist' }}

@@ -2,16 +2,20 @@ import Storage from 'expo-sqlite/kv-store';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-import type { LanguagePreference, Settings, ThemePreference } from './types';
+import type { LanguagePreference, Settings, ThemePreference, VibrationPreset } from './types';
 
 type SettingsState = Settings & {
   setTheme: (theme: ThemePreference) => void;
   setLanguage: (language: LanguagePreference) => void;
+  setVibration: (vibration: VibrationPreset) => void;
+  setEscalation: (escalation: boolean) => void;
 };
 
 const DEFAULT_SETTINGS: Settings = {
   theme: 'system',
   language: 'system',
+  vibration: 'short',
+  escalation: true,
 };
 
 /**
@@ -24,6 +28,8 @@ export const useSettings = create<SettingsState>()(
       ...DEFAULT_SETTINGS,
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
+      setVibration: (vibration) => set({ vibration }),
+      setEscalation: (escalation) => set({ escalation }),
     }),
     {
       name: 'settings',
@@ -35,7 +41,13 @@ export const useSettings = create<SettingsState>()(
           Storage.removeItemSync(key);
         },
       })),
-      partialize: ({ theme, language }) => ({ theme, language }),
+      // Сохранённые ранее настройки сливаются с DEFAULT_SETTINGS, поэтому новые поля получают значения по умолчанию.
+      partialize: ({ theme, language, vibration, escalation }) => ({
+        theme,
+        language,
+        vibration,
+        escalation,
+      }),
     },
   ),
 );

@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { getNavigationTheme } from '@/constants/theme';
+import { useNotificationResponses } from '@/features/notifications/use-notification-responses';
+import { useNotificationsLifecycle } from '@/features/notifications/use-notifications-lifecycle';
 import { applyInitialTheme, useApplySettings } from '@/features/settings/use-apply-settings';
 import { useTasks } from '@/features/tasks/store';
 import { WeeklyCleanup } from '@/features/tasks/weekly-cleanup';
@@ -19,6 +21,8 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   useApplySettings();
+  useNotificationsLifecycle();
+  useNotificationResponses();
   const { t } = useTranslation();
 
   useEffect(() => {

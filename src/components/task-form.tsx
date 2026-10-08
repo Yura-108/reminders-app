@@ -17,6 +17,8 @@ import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
 import { Spacing } from '@/constants/theme';
+import { useNotificationPermission } from '@/features/notifications/permissions';
+import { getTaskStatus } from '@/features/tasks/selectors';
 import { useTasks } from '@/features/tasks/store';
 import type { Task } from '@/features/tasks/types';
 import { useDateFormat } from '@/hooks/use-date-format';
@@ -94,6 +96,9 @@ export function TaskForm({ task, initialRemindAt }: Props) {
       return;
     }
 
+    // Разрешение спрашиваем при первом сохранении, когда понятно, зачем оно (SPEC 4.4).
+    useNotificationPermission.getState().ensure();
+
     const values = { title: trimmedTitle, remindAt: remindAt.toISOString() };
     if (task) {
       updateTask(task.id, values);
@@ -124,6 +129,12 @@ export function TaskForm({ task, initialRemindAt }: Props) {
     if (!task) return;
     toggleDone(task.id);
     setClosing(true);
+  };
+
+  const handleSnooze = () => {
+    if (!task) return;
+    // Меню переноса заменяет окно задачи, а не открывается поверх него.
+    router.replace({ pathname: '/task/snooze/[id]', params: { id: task.id } });
   };
 
   const handleDelete = () => {
@@ -235,6 +246,13 @@ export function TaskForm({ task, initialRemindAt }: Props) {
 
           {task ? (
             <View style={styles.actions}>
+              {getTaskStatus(task, now) === 'burning' ? (
+                <Button
+                  label={t('task.snooze')}
+                  icon={{ ios: 'clock.arrow.circlepath', android: 'snooze', web: 'snooze' }}
+                  onPress={handleSnooze}
+                />
+              ) : null}
               <Button
                 label={task.completedAt ? t('task.markUndone') : t('task.markDone')}
                 icon={
