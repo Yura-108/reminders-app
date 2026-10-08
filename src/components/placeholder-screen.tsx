@@ -1,0 +1,39 @@
+import { StyleSheet } from 'react-native';
+
+import { ThemedText } from '@/components/themed-text';
+import { ThemedView } from '@/components/themed-view';
+import { Spacing } from '@/constants/theme';
+
+type Props = {
+  title: string;
+  hint?: string;
+};
+
+/**
+ * Временный экран-заглушка, пока у раздела нет реального содержимого.
+ */
+export function PlaceholderScreen({ title, hint }: Props) {
+  return (
+    <ThemedView style={styles.container}>
+      <ThemedText type="subtitle">{title}</ThemedText>
+      {hint ? (
+        <ThemedText type="small" themeColor="textSecondary" style={styles.hint}>
+          {hint}
+        </ThemedText>
+      ) : null}
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+    padding: Spacing.four,
+  },
+  hint: {
+    textAlign: 'center',
+  },
+});
