@@ -33,7 +33,7 @@ import {
 import { useWeekStart } from '@/features/settings/use-week-start';
 import { useDateFormat } from '@/hooks/use-date-format';
 import { useTheme } from '@/hooks/use-theme';
-import { atTime } from '@/utils/date';
+import { atTime, calendarDate } from '@/utils/date';
 import { pickDate, pickTime } from '@/utils/pickers';
 
 type Props = {
@@ -69,7 +69,7 @@ function initialValues(birthday?: Birthday): FormValues {
 
   return {
     name: birthday.name,
-    date: new Date(birthday.year ?? PLACEHOLDER_YEAR, birthday.month - 1, birthday.day),
+    date: calendarDate(birthday.year ?? PLACEHOLDER_YEAR, birthday.month, birthday.day),
     yearKnown: birthday.year !== null,
     remindMinutes: birthday.remindMinutes,
     remindDays: birthday.remindDays,
@@ -164,7 +164,7 @@ export function BirthdayForm({ birthday }: Props) {
       name: contact.name || values.name,
       contactId: contact.contactId,
       ...(date && {
-        date: new Date(date.year ?? PLACEHOLDER_YEAR, date.month - 1, date.day),
+        date: calendarDate(date.year ?? PLACEHOLDER_YEAR, date.month, date.day),
         yearKnown: date.year !== null,
       }),
     });
@@ -174,12 +174,13 @@ export function BirthdayForm({ birthday }: Props) {
   const handlePickDate = async () => {
     const today = new Date();
     const date = await pickDate({
-      value: values.date ?? new Date(PLACEHOLDER_YEAR, today.getMonth(), today.getDate()),
+      // Полдень: диалог сохраняет время значения, и выбранный день не «уедет» из-за часового пояса.
+      value: values.date ?? calendarDate(PLACEHOLDER_YEAR, today.getMonth() + 1, today.getDate()),
       maximumDate: today,
       firstDayOfWeek: weekStart,
     });
     if (date) {
-      update({ date });
+      update({ date: calendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate()) });
     }
   };
 

@@ -1,4 +1,4 @@
-import { calendarDayDiff, startOfDay, toDayKey } from '@/utils/date';
+import { calendarDate, calendarDayDiff, startOfDay, toDayKey } from '@/utils/date';
 
 import type { Birthday } from './types';
 
@@ -6,10 +6,10 @@ function isLeapYear(year: number) {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
 }
 
-/** Дата дня рождения в указанном году (полночь). 29 февраля в невисокосный год → 28 февраля. */
+/** Дата дня рождения в указанном году (полдень, см. calendarDate). 29 февраля в невисокосный год → 28 февраля. */
 export function birthdayInYear(birthday: Pick<Birthday, 'day' | 'month'>, year: number): Date {
   const day = birthday.month === 2 && birthday.day === 29 && !isLeapYear(year) ? 28 : birthday.day;
-  return new Date(year, birthday.month - 1, day);
+  return calendarDate(year, birthday.month, day);
 }
 
 /** Ближайший день рождения: сегодня или позже. */

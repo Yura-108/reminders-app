@@ -18,6 +18,7 @@ import {
 } from '@/features/birthdays/types';
 import { useSnackbar } from '@/features/snackbar/store';
 import { useTheme } from '@/hooks/use-theme';
+import { calendarDate } from '@/utils/date';
 
 type LoadState =
   | { status: 'loading' }
@@ -121,7 +122,7 @@ export default function BirthdayImportScreen() {
     const date = contact.birthday;
     if (!date) return '';
     // Год-заглушка 2000 (високосный) — чтобы 29 февраля форматировалось корректно.
-    const label = dateFormat.format(new Date(2000, date.month - 1, date.day));
+    const label = dateFormat.format(calendarDate(2000, date.month, date.day));
     return date.year ? `${label} ${date.year}` : label;
   };
 

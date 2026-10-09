@@ -82,3 +82,13 @@ export function toDayKey(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
   return `${date.getFullYear()}-${month}-${day}`;
 }
+
+/**
+ * Календарная дата без времени (день рождения и т.п.): месяц 1..12, время — полдень.
+ * Не полночь — потому что для прошлых лет движок JS и Intl могут по-разному считать смещение
+ * часового пояса (например, в 2003 году оно было другим), и полночь при показе «уезжает»
+ * на предыдущий день. Полдень от такого сдвига на час-два защищён.
+ */
+export function calendarDate(year: number, month: number, day: number): Date {
+  return new Date(year, month - 1, day, 12);
+}
