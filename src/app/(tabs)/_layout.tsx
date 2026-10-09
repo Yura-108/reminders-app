@@ -1,7 +1,7 @@
 import { router, Tabs, usePathname } from 'expo-router';
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useTranslation } from 'react-i18next';
-import type { ColorValue } from 'react-native';
+import { Pressable, type ColorValue } from 'react-native';
 
 import { TabBarAddButton } from '@/components/tab-bar-add-button';
 import { countBirthdaysToday } from '@/features/birthdays/selectors';
@@ -94,6 +94,21 @@ export default function TabLayout() {
             paddingHorizontal: 3,
           },
           tabBarIcon: tabIcon({ ios: 'gift', android: 'cake', web: 'cake' }),
+          // Импорт дней рождения из контактов (SPEC 12.4).
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push('/birthday/import')}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t('birthdayImport.action')}
+              style={{ marginRight: 16 }}>
+              <SymbolView
+                name={{ ios: 'person.crop.circle.badge.plus', android: 'person_add', web: 'person_add' }}
+                tintColor={theme.primary}
+                size={24}
+              />
+            </Pressable>
+          ),
         }}
       />
       <Tabs.Screen

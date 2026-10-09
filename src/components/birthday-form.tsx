@@ -1,10 +1,12 @@
 import { router, Stack, useNavigation } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { usePreventRemove } from 'expo-router/react-navigation';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
   KeyboardAvoidingView,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -18,6 +20,7 @@ import { Chip } from '@/components/ui/chip';
 import { FieldButton, HeaderCloseButton, HeaderSaveButton } from '@/components/ui/form-controls';
 import { SettingsRow } from '@/components/ui/settings-group';
 import { Spacing } from '@/constants/theme';
+import { pickContact } from '@/features/birthdays/contacts';
 import { useBirthdays } from '@/features/birthdays/store';
 import {
   DEFAULT_REMIND_DAYS,
@@ -48,6 +51,8 @@ type FormValues = {
   yearKnown: boolean;
   remindMinutes: number;
   remindDays: number[];
+  /** Контакт, из которого взяты данные (защита от дублей при импорте). */
+  contactId: string | null;
 };
 
 function initialValues(birthday?: Birthday): FormValues {
@@ -58,6 +63,7 @@ function initialValues(birthday?: Birthday): FormValues {
       yearKnown: true,
       remindMinutes: DEFAULT_REMIND_MINUTES,
       remindDays: DEFAULT_REMIND_DAYS,
+      contactId: null,
     };
   }
 
@@ -67,6 +73,7 @@ function initialValues(birthday?: Birthday): FormValues {
     yearKnown: birthday.year !== null,
     remindMinutes: birthday.remindMinutes,
     remindDays: birthday.remindDays,
+    contactId: birthday.contactId,
   };
 }
 
@@ -98,6 +105,8 @@ export function BirthdayForm({ birthday }: Props) {
   const [initial] = useState(() => initialValues(birthday));
   const [values, setValues] = useState(initial);
   const [closing, setClosing] = useState(false);
+  // Подсказка, если в выбранном контакте нет дня рождения.
+  const [contactHasNoBirthday, setContactHasNoBirthday] = useState(false);
   const update = (patch: Partial<FormValues>) => setValues((current) => ({ ...current, ...patch }));
 
   const trimmedName = values.name.trim();
@@ -133,7 +142,7 @@ export function BirthdayForm({ birthday }: Props) {
       year: values.yearKnown ? values.date.getFullYear() : null,
       remindMinutes: values.remindMinutes,
       remindDays: [...values.remindDays].sort((a, b) => a - b),
-      contactId: birthday?.contactId ?? null,
+      contactId: values.contactId,
     };
 
     if (birthday) {
@@ -142,6 +151,24 @@ export function BirthdayForm({ birthday }: Props) {
       addBirthday(input);
     }
     setClosing(true);
+  };
+
+  const handlePickContact = async () => {
+    const contact = await pickContact();
+    if (!contact) {
+      return;
+    }
+
+    const { birthday: date } = contact;
+    update({
+      name: contact.name || values.name,
+      contactId: contact.contactId,
+      ...(date && {
+        date: new Date(date.year ?? PLACEHOLDER_YEAR, date.month - 1, date.day),
+        yearKnown: date.year !== null,
+      }),
+    });
+    setContactHasNoBirthday(!date);
   };
 
   const handlePickDate = async () => {
@@ -218,7 +245,23 @@ export function BirthdayForm({ birthday }: Props) {
               autoCapitalize="words"
               style={[styles.input, { color: theme.text }]}
             />
+            <Pressable
+              onPress={handlePickContact}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t('birthday.pickContact')}>
+              <SymbolView
+                name={{ ios: 'person.crop.circle', android: 'contacts', web: 'contacts' }}
+                tintColor={theme.primary}
+                size={26}
+              />
+            </Pressable>
           </View>
+          {contactHasNoBirthday ? (
+            <ThemedText type="small" themeColor="textSecondary" style={styles.hint}>
+              {t('birthday.contactNoBirthday')}
+            </ThemedText>
+          ) : null}
 
           <View style={styles.section}>
             <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
@@ -301,16 +344,24 @@ const styles = StyleSheet.create({
     gap: Spacing.four,
   },
   inputCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
     borderRadius: 14,
     paddingHorizontal: Spacing.three,
   },
   input: {
+    flex: 1,
     minHeight: 52,
     fontSize: 18,
     padding: 0,
   },
   section: {
     gap: Spacing.two,
+  },
+  hint: {
+    marginTop: -Spacing.three,
+    paddingHorizontal: Spacing.one,
   },
   sectionTitle: {
     textTransform: 'uppercase',

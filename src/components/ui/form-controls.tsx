@@ -61,8 +61,16 @@ export function HeaderCloseButton({ onPress }: { onPress: () => void }) {
   );
 }
 
-/** Кнопка «Сохранить» в шапке модалки; неактивна — серая. */
-export function HeaderSaveButton({ enabled, onPress }: { enabled: boolean; onPress: () => void }) {
+/** Кнопка «Сохранить» (или другая подпись) в шапке модалки; неактивна — серая. */
+export function HeaderSaveButton({
+  enabled,
+  label,
+  onPress,
+}: {
+  enabled: boolean;
+  label?: string;
+  onPress: () => void;
+}) {
   const theme = useTheme();
   const { t } = useTranslation();
 
@@ -76,7 +84,7 @@ export function HeaderSaveButton({ enabled, onPress }: { enabled: boolean; onPre
       <ThemedText
         type="smallBold"
         style={[styles.saveLabel, { color: enabled ? theme.primary : theme.textSecondary }]}>
-        {t('task.save')}
+        {label ?? t('task.save')}
       </ThemedText>
     </Pressable>
   );

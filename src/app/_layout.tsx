@@ -56,6 +56,10 @@ export default function RootLayout() {
             options={{ presentation: 'modal', title: t('birthday.editTitle') }}
           />
           <Stack.Screen
+            name="birthday/import"
+            options={{ presentation: 'modal', title: t('birthdayImport.title') }}
+          />
+          <Stack.Screen
             name="task/snooze/[id]"
             options={{
               presentation: 'formSheet',

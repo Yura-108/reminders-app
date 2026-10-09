@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LayoutAnimation, SectionList, StyleSheet, View } from 'react-native';
 
 import { BirthdayCard } from '@/components/birthday-card';
+import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/empty-state';
 import { Snackbar } from '@/components/snackbar';
 import { SwipeableRow } from '@/components/swipeable-row';
@@ -94,8 +95,15 @@ export default function BirthdaysScreen() {
         <EmptyState
           icon={{ ios: 'gift', android: 'cake', web: 'cake' }}
           title={t('birthdays.emptyTitle')}
-          hint={t('birthdays.emptyHint')}
-        />
+          hint={t('birthdays.emptyHint')}>
+          <View style={styles.emptyAction}>
+            <Button
+              label={t('birthdayImport.action')}
+              icon={{ ios: 'person.crop.circle.badge.plus', android: 'person_add', web: 'person_add' }}
+              onPress={() => router.push('/birthday/import')}
+            />
+          </View>
+        </EmptyState>
       ) : (
         <SectionList
           sections={sections}
@@ -129,6 +137,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.one,
     paddingTop: Spacing.three,
     paddingBottom: Spacing.two,
+  },
+  emptyAction: {
+    alignSelf: 'stretch',
+    marginTop: Spacing.three,
   },
   separator: {
     height: Spacing.two,

@@ -765,7 +765,12 @@ CREATE TABLE birthdays (
 `selectors.ts` (ближайшая дата, «через N дней», возраст), `notifications.ts`, `contacts.ts`.
 Роуты: `src/app/birthday/new.tsx`, `[id].tsx`, `import.tsx`.
 
-Пакет: `expo-contacts` (есть в Expo Go). Разрешение `READ_CONTACTS`.
+Пакет: `expo-contacts` (есть в Expo Go). Разрешение `READ_CONTACTS`; `WRITE_CONTACTS` заблокировано
+в `app.json` (`android.blockedPermissions`) — приложение контакты только читает.
+День рождения контакта на iOS лежит в поле `birthday`, на Android — среди дат контакта с меткой `birthday`
+(`features/birthdays/contacts.ts` читает оба варианта).
+
+Точки входа в импорт: значок в шапке вкладки «Дни рождения» и кнопка в её пустом состоянии.
 
 ### 12.8 Этапы
 
