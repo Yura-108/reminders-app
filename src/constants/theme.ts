@@ -32,6 +32,8 @@ export const Colors = {
     danger: '#E5484D',
     /** Выполнено */
     success: '#30A46C',
+    /** Дни рождения: кнопка «+» на их вкладке, сегодняшние ДР, точки в календаре */
+    birthday: '#E5487F',
   },
   dark: {
     text: '#ECEDEE',
@@ -45,6 +47,7 @@ export const Colors = {
     onPrimary: '#FFFFFF',
     danger: '#FF6369',
     success: '#3DD68C',
+    birthday: '#FF6B9A',
   },
 } as const;
 

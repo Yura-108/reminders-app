@@ -18,6 +18,22 @@ const MIGRATIONS: string[] = [
   );
   CREATE INDEX idx_tasks_remind_at ON tasks(remind_at);
   `,
+  // v2: дни рождения (SPEC 12.7)
+  `
+  CREATE TABLE birthdays (
+    id TEXT PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    day INTEGER NOT NULL,
+    month INTEGER NOT NULL,
+    year INTEGER,
+    remind_minutes INTEGER NOT NULL,
+    remind_days TEXT NOT NULL,
+    contact_id TEXT,
+    notification_ids TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  );
+  `,
 ];
 
 /**

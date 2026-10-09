@@ -1,3 +1,9 @@
+// Склонения («1 день / 2 дня / 5 дней») i18next считает через Intl.PluralRules.
+// Полифил подключается, только если в JS-движке его нет или он неполный.
+import '@formatjs/intl-pluralrules/polyfill.js';
+import '@formatjs/intl-pluralrules/locale-data/en.js';
+import '@formatjs/intl-pluralrules/locale-data/ru.js';
+
 import { getLocales } from 'expo-localization';
 import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';

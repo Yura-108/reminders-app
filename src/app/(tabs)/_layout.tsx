@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import type { ColorValue } from 'react-native';
 
 import { TabBarAddButton } from '@/components/tab-bar-add-button';
+import { countBirthdaysToday } from '@/features/birthdays/selectors';
+import { useBirthdays } from '@/features/birthdays/store';
 import { useCalendarSelection } from '@/features/calendar/store';
 import { countBurning } from '@/features/tasks/selectors';
 import { useTasks } from '@/features/tasks/store';
@@ -23,12 +25,18 @@ export default function TabLayout() {
   const { t } = useTranslation();
   const now = useNow();
   const burningCount = useTasks((s) => countBurning(s.tasks, now));
+  const birthdaysToday = useBirthdays((s) => countBirthdaysToday(s.birthdays, now));
   const pathname = usePathname();
   const calendarDay = useCalendarSelection((s) => s.selectedDay);
 
-  // На вкладке календаря новая задача создаётся на выбранный в нём день (SPEC 3.3).
+  const onBirthdays = pathname === '/birthdays';
+
+  // На вкладке дней рождения «+» создаёт день рождения (SPEC 12.2),
+  // на вкладке календаря — задачу на выбранный в нём день (SPEC 3.3).
   const openNewTask = () => {
-    if (pathname === '/calendar') {
+    if (onBirthdays) {
+      router.push('/birthday/new');
+    } else if (pathname === '/calendar') {
       router.push({ pathname: '/task/new', params: { date: calendarDay } });
     } else {
       router.push('/task/new');
@@ -60,13 +68,31 @@ export default function TabLayout() {
         name="add"
         options={{
           title: t('tabs.add'),
-          tabBarButton: () => <TabBarAddButton onPress={openNewTask} />,
+          tabBarButton: () => (
+            <TabBarAddButton
+              color={onBirthdays ? theme.birthday : theme.primary}
+              accessibilityLabel={onBirthdays ? t('birthday.addA11y') : t('task.addA11y')}
+              onPress={openNewTask}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="birthdays"
         options={{
           title: t('tabs.birthdays'),
+          // Сегодня у кого-то день рождения — розовый бейдж с количеством.
+          tabBarBadge: birthdaysToday > 0 ? birthdaysToday : undefined,
+          // По умолчанию бейдж 18×18 с цифрой 13 — делаем компактнее.
+          tabBarBadgeStyle: {
+            backgroundColor: theme.birthday,
+            minWidth: 14,
+            height: 14,
+            borderRadius: 7,
+            fontSize: 10,
+            lineHeight: 13,
+            paddingHorizontal: 3,
+          },
           tabBarIcon: tabIcon({ ios: 'gift', android: 'cake', web: 'cake' }),
         }}
       />

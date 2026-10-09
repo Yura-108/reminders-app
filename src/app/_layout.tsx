@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { getNavigationTheme } from '@/constants/theme';
+import { useBirthdays } from '@/features/birthdays/store';
 import { useNotificationResponses } from '@/features/notifications/use-notification-responses';
 import { useNotificationsLifecycle } from '@/features/notifications/use-notifications-lifecycle';
 import { applyInitialTheme, useApplySettings } from '@/features/settings/use-apply-settings';
@@ -26,10 +27,8 @@ export default function RootLayout() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    useTasks
-      .getState()
-      .init()
-      .catch((error) => console.error('Failed to load tasks', error))
+    Promise.all([useTasks.getState().init(), useBirthdays.getState().init()])
+      .catch((error) => console.error('Failed to load data', error))
       .finally(() => SplashScreen.hideAsync());
   }, []);
   const scheme = useResolvedColorScheme();
@@ -47,6 +46,14 @@ export default function RootLayout() {
           <Stack.Screen
             name="task/[id]"
             options={{ presentation: 'modal', title: t('task.editTitle') }}
+          />
+          <Stack.Screen
+            name="birthday/new"
+            options={{ presentation: 'modal', title: t('birthday.newTitle') }}
+          />
+          <Stack.Screen
+            name="birthday/[id]"
+            options={{ presentation: 'modal', title: t('birthday.editTitle') }}
           />
           <Stack.Screen
             name="task/snooze/[id]"

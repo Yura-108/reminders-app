@@ -1,21 +1,13 @@
 import { router, Stack, useNavigation } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  View,
-} from 'react-native';
+import { Alert, KeyboardAvoidingView, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { Button } from '@/components/ui/button';
 import { Chip } from '@/components/ui/chip';
+import { FieldButton, HeaderCloseButton, HeaderSaveButton } from '@/components/ui/form-controls';
 import { Spacing } from '@/constants/theme';
 import { useNotificationPermission } from '@/features/notifications/permissions';
 import { useWeekStart } from '@/features/settings/use-week-start';
@@ -167,27 +159,8 @@ export function TaskForm({ task, initialRemindAt }: Props) {
     <>
       <Stack.Screen
         options={{
-          headerLeft: () => (
-            <HeaderIconButton
-              icon={{ ios: 'xmark', android: 'close', web: 'close' }}
-              label={t('common.close')}
-              onPress={() => router.back()}
-            />
-          ),
-          headerRight: () => (
-            <Pressable
-              onPress={save}
-              disabled={!canSave}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityState={{ disabled: !canSave }}>
-              <ThemedText
-                type="smallBold"
-                style={[styles.saveLabel, { color: canSave ? theme.primary : theme.textSecondary }]}>
-                {t('task.save')}
-              </ThemedText>
-            </Pressable>
-          ),
+          headerLeft: () => <HeaderCloseButton onPress={() => router.back()} />,
+          headerRight: () => <HeaderSaveButton enabled={canSave} onPress={save} />,
         }}
       />
 
@@ -310,54 +283,6 @@ function buildQuickOptions(now: Date): QuickOption[] {
   return options;
 }
 
-function FieldButton({
-  icon,
-  label,
-  error,
-  onPress,
-}: {
-  icon: SymbolViewProps['name'];
-  label: string;
-  error: boolean;
-  onPress: () => void;
-}) {
-  const theme = useTheme();
-
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={({ pressed }) => [
-        styles.field,
-        {
-          backgroundColor: pressed ? theme.backgroundSelected : theme.card,
-          borderColor: error ? theme.danger : 'transparent',
-        },
-      ]}>
-      <SymbolView name={icon} tintColor={error ? theme.danger : theme.primary} size={22} />
-      <ThemedText style={error && { color: theme.danger }}>{label}</ThemedText>
-    </Pressable>
-  );
-}
-
-function HeaderIconButton({
-  icon,
-  label,
-  onPress,
-}: {
-  icon: SymbolViewProps['name'];
-  label: string;
-  onPress: () => void;
-}) {
-  const theme = useTheme();
-
-  return (
-    <Pressable onPress={onPress} hitSlop={8} accessibilityRole="button" accessibilityLabel={label}>
-      <SymbolView name={icon} tintColor={theme.text} size={24} />
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
@@ -392,16 +317,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.two,
   },
-  field: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-    minHeight: 52,
-    paddingHorizontal: Spacing.three,
-    borderRadius: 14,
-    borderWidth: 1.5,
-  },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -410,8 +325,5 @@ const styles = StyleSheet.create({
   },
   actions: {
     gap: Spacing.two,
-  },
-  saveLabel: {
-    fontSize: 16,
   },
 });

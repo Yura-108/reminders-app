@@ -1,12 +1,17 @@
+import { router } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { Calendar, type CalendarProps, type DateData } from 'react-native-calendars';
 
+import { BirthdayCard } from '@/components/birthday-card';
 import { Snackbar } from '@/components/snackbar';
 import { SwipeableTaskCard } from '@/components/swipeable-task-card';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { ageInYearOf, birthdayDayKeys, birthdaysOnDay } from '@/features/birthdays/selectors';
+import { useBirthdays } from '@/features/birthdays/store';
+import type { Birthday } from '@/features/birthdays/types';
 import '@/features/calendar/locale';
 import { useCalendarSelection } from '@/features/calendar/store';
 import { useWeekStart } from '@/features/settings/use-week-start';
@@ -29,6 +34,7 @@ export default function CalendarScreen() {
   const scheme = useResolvedColorScheme();
   const now = useNow();
   const tasks = useTasks((s) => s.tasks);
+  const birthdays = useBirthdays((s) => s.birthdays);
   const selectedDay = useCalendarSelection((s) => s.selectedDay);
   const selectDay = useCalendarSelection((s) => s.selectDay);
   const { openTask, handleToggleDone, handleDelete } = useTaskActions();
@@ -40,13 +46,24 @@ export default function CalendarScreen() {
   // Смена ключа пересоздаёт календарь — так кнопка «Сегодня» возвращает и к текущему месяцу.
   const [resetCount, setResetCount] = useState(0);
 
+  // Точки под днём (markingType="multi-dot"): задачи — по их состоянию, дни рождения — розовая.
   const markedDates = useMemo(() => {
     const dotColors = { burning: theme.danger, active: theme.primary, done: theme.textSecondary };
     const result: NonNullable<CalendarProps['markedDates']> = {};
+    const addDot = (day: string, key: string, color: string) => {
+      const dots = result[day]?.dots ?? [];
+      result[day] = { dots: [...dots, { key, color, selectedDotColor: theme.onPrimary }] };
+    };
 
     for (const [day, marker] of buildDayMarkers(tasks, now)) {
-      result[day] = { marked: true, dotColor: dotColors[marker] };
+      addDot(day, 'tasks', dotColors[marker]);
     }
+    // Дни рождения повторяются каждый год: отмечаем видимый год и соседние (декабрь/январь).
+    const visibleYear = Number(visibleMonth.slice(0, 4));
+    for (const day of birthdayDayKeys(birthdays, [visibleYear - 1, visibleYear, visibleYear + 1])) {
+      addDot(day, 'birthday', theme.birthday);
+    }
+
     result[selectedDay] = {
       ...result[selectedDay],
       selected: true,
@@ -54,7 +71,7 @@ export default function CalendarScreen() {
     };
 
     return result;
-  }, [tasks, now, selectedDay, theme]);
+  }, [tasks, birthdays, now, selectedDay, visibleMonth, theme]);
 
   const calendarTheme = useMemo(
     () => ({
@@ -75,6 +92,11 @@ export default function CalendarScreen() {
 
   const dayTasks = useMemo(() => tasksForDay(tasks, selectedDay), [tasks, selectedDay]);
   const selectedDate = parseDayParam(selectedDay) ?? now;
+  const dayBirthdays = birthdaysOnDay(birthdays, selectedDate);
+
+  const openBirthday = useCallback((birthday: Birthday) => {
+    router.push({ pathname: '/birthday/[id]', params: { id: birthday.id } });
+  }, []);
   const showTodayButton = selectedDay !== todayKey || visibleMonth !== todayKey.slice(0, 7);
 
   const goToToday = () => {
@@ -105,6 +127,7 @@ export default function CalendarScreen() {
           key={`${scheme}-${i18n.language}-${weekStart}-${resetCount}`}
           current={selectedDay}
           firstDay={weekStart}
+          markingType="multi-dot"
           markedDates={markedDates}
           onDayPress={(day: DateData) => selectDay(day.dateString)}
           onMonthChange={(month: DateData) => setVisibleMonth(month.dateString.slice(0, 7))}
@@ -125,6 +148,23 @@ export default function CalendarScreen() {
           </Pressable>
         ) : null}
       </View>
+
+      {dayBirthdays.length > 0 ? (
+        <View style={styles.birthdays}>
+          {dayBirthdays.map((birthday) => {
+            const age = ageInYearOf(birthday, selectedDate);
+            return (
+              <BirthdayCard
+                key={birthday.id}
+                birthday={birthday}
+                subtitle={age === null ? t('calendar.birthday') : t('calendar.birthdayAge', { age })}
+                highlighted
+                onPress={openBirthday}
+              />
+            );
+          })}
+        </View>
+      ) : null}
     </>
   );
 
@@ -178,6 +218,10 @@ const styles = StyleSheet.create({
   },
   dayTitle: {
     fontSize: 16,
+  },
+  birthdays: {
+    gap: Spacing.two,
+    paddingBottom: Spacing.two,
   },
   empty: {
     alignItems: 'center',
