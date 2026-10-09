@@ -2,6 +2,7 @@ import type { MaybeNotificationResponse } from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 
+import { useBirthdays } from '@/features/birthdays/store';
 import { useTasks } from '@/features/tasks/store';
 
 import { NotificationAction } from './constants';
@@ -16,12 +17,15 @@ const useLastResponse: () => MaybeNotificationResponse =
  * Реакция на нажатия по уведомлению, когда приложение открыто или открывается из уведомления:
  * - тап по уведомлению → экран задачи;
  * - «Перенести» → меню переноса;
- * - «Выполнено» → отметить (если приложение живо; иначе это делает фоновая задача).
- * Ждём загрузки задач, иначе экран задачи откроется пустым.
+ * - «Выполнено» → отметить (если приложение живо; иначе это делает фоновая задача);
+ * - тап по уведомлению о дне рождения → форма этого дня рождения.
+ * Ждём загрузки данных, иначе экран откроется пустым.
  */
 export function useNotificationResponses() {
   const response = useLastResponse();
-  const ready = useTasks((s) => s.ready);
+  const tasksReady = useTasks((s) => s.ready);
+  const birthdaysReady = useBirthdays((s) => s.ready);
+  const ready = tasksReady && birthdaysReady;
 
   useEffect(() => {
     if (!ready || !response || !Notifications) {
@@ -31,7 +35,14 @@ export function useNotificationResponses() {
     // Ответ обработан — убираем, чтобы не повторить его при следующем рендере.
     Notifications.clearLastNotificationResponse();
 
-    const taskId = response.notification.request.content.data?.taskId;
+    const data = response.notification.request.content.data;
+
+    if (typeof data?.birthdayId === 'string') {
+      router.push({ pathname: '/birthday/[id]', params: { id: data.birthdayId } });
+      return;
+    }
+
+    const taskId = data?.taskId;
     if (typeof taskId !== 'string') {
       return;
     }

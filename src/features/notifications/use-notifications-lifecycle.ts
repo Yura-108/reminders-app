@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState } from 'react-native';
 
+import { useBirthdays } from '@/features/birthdays/store';
 import { useSettings } from '@/features/settings/store';
 import { useTasks } from '@/features/tasks/store';
 
@@ -11,12 +12,15 @@ import { reconcileNotifications } from './sync';
 
 /**
  * Всё, что касается уведомлений на уровне приложения:
- * - при запуске: каналы и кнопки, статус разрешения, сверка с задачами;
+ * - при запуске: каналы и кнопки, статус разрешения, сверка с задачами и днями рождения;
  * - при возврате на передний план: перечитать задачи (их могла изменить фоновая задача) и разрешение;
  * - при смене языка, вибрации или режима повторов: перепланировать уведомления.
  */
 export function useNotificationsLifecycle() {
-  const ready = useTasks((s) => s.ready);
+  // Сверять можно только когда загружено всё: иначе уведомления незагруженных данных сочтутся «сиротскими».
+  const tasksReady = useTasks((s) => s.ready);
+  const birthdaysReady = useBirthdays((s) => s.ready);
+  const ready = tasksReady && birthdaysReady;
   const { i18n } = useTranslation();
   const language = i18n.language;
   const vibration = useSettings((s) => s.vibration);
@@ -60,7 +64,13 @@ export function useNotificationsLifecycle() {
     }
 
     (languageChanged ? setupNotifications() : Promise.resolve())
-      .then(() => useTasks.getState().rescheduleAll())
+      .then(async () => {
+        await useTasks.getState().rescheduleAll();
+        // Повторы задач на дни рождения не влияют, а язык и вибрация — влияют.
+        if (languageChanged || prev.vibration !== vibration) {
+          await useBirthdays.getState().rescheduleAll();
+        }
+      })
       .catch((error) => console.warn('Rescheduling failed', error));
   }, [ready, language, vibration, escalation]);
 }

@@ -58,6 +58,8 @@ const en = {
     turnsAge: 'turns {{age}}',
     turnedAge: 'turns {{age}} today',
     deleted: 'Birthday deleted',
+    banner: 'Birthday today: {{names}}',
+    bannerMore: '{{name}} and {{count}} more',
   },
   birthday: {
     newTitle: 'Birthday',
@@ -79,6 +81,15 @@ const en = {
     deleteConfirmTitle: 'Delete birthday?',
     pickContact: 'Choose from contacts',
     contactNoBirthday: 'This contact has no birthday — choose the date below.',
+  },
+  birthdayNotifications: {
+    todayTitle: '🎂 {{name}}’s birthday',
+    todayBody: 'Today — don’t forget to say happy birthday',
+    soonTitle: '🎂 {{name}}’s birthday is coming',
+    soonBody_one: 'In {{count}} day, {{date}}',
+    soonBody_few: 'In {{count}} days, {{date}}',
+    soonBody_many: 'In {{count}} days, {{date}}',
+    soonBody_other: 'In {{count}} days, {{date}}',
   },
   contacts: {
     deniedTitle: 'No access to contacts',

@@ -56,6 +56,8 @@ const ru: Translation = {
     turnsAge: 'исполнится {{age}}',
     turnedAge: 'исполнилось {{age}}',
     deleted: 'День рождения удалён',
+    banner: 'Сегодня день рождения: {{names}}',
+    bannerMore: '{{name}} и ещё {{count}}',
   },
   birthday: {
     newTitle: 'День рождения',
@@ -77,6 +79,16 @@ const ru: Translation = {
     deleteConfirmTitle: 'Удалить день рождения?',
     pickContact: 'Выбрать из контактов',
     contactNoBirthday: 'В контакте не указан день рождения — выберите дату ниже.',
+  },
+  birthdayNotifications: {
+    // Имя в именительном падеже («Аня»), поэтому без «у …» — склонять имена мы не умеем.
+    todayTitle: '🎂 {{name}} — день рождения',
+    todayBody: 'Сегодня — не забудьте поздравить',
+    soonTitle: '🎂 {{name}} — скоро день рождения',
+    soonBody_one: 'Через {{count}} день, {{date}}',
+    soonBody_few: 'Через {{count}} дня, {{date}}',
+    soonBody_many: 'Через {{count}} дней, {{date}}',
+    soonBody_other: 'Через {{count}} дня, {{date}}',
   },
   contacts: {
     deniedTitle: 'Нет доступа к контактам',

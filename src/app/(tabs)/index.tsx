@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+import { BirthdayBanner } from '@/components/birthday-banner';
 import { EmptyState } from '@/components/empty-state';
 import { PermissionBanner } from '@/components/permission-banner';
 import { Snackbar } from '@/components/snackbar';
@@ -23,6 +24,7 @@ export default function TasksScreen() {
   return (
     <View style={{ flex: 1 }}>
       <PermissionBanner />
+      <BirthdayBanner now={now} />
       {tasks.length === 0 ? (
         <EmptyState
           icon={{ ios: 'checklist', android: 'checklist', web: 'checklist' }}
